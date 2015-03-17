@@ -26,24 +26,24 @@
 #include <avr/pgmspace.h>
 #include <avr/eeprom.h>
 #include <pins_arduino.h>
-#include <Wire.h>
-#include <FlexiTimer2.h> // Required for RTC and Delay Timer
-#include <Time.h>
 #if defined(ARDUINO) && (ARDUINO >= 100)
 #include "Arduino.h"
 #else
-#include "WProgram.h" // shouldn't need this but arduino sometimes messes up and puts inside an #ifdef
+#include "WProgram.h"
 #endif // ARDUINO
+#include "libraries/RTClib/RTClib.h"
+#include "libraries/FlexiTimer2/FlexiTimer2.h" // Required for RTC and Delay Timer
+#include "libraries/Time/Time.h"
 
-#define VERSION "D3.6.1"
+//#define VERSION "D3.6.1"
 
 //-- begin features
 
 // current measurement
-#define AMMETER
+//#define AMMETER
 
 // serial remote api
-#define RAPI
+//#define RAPI
 
 // serial port command line
 // For the RTC version, only CLI or LCD can be defined at one time. 
@@ -81,7 +81,7 @@
 
 #ifdef AMMETER
 // kWh Recording feature depends upon #AMMETER support
-#define KWH_RECORDING
+//#define KWH_RECORDING
 #endif //AMMETER
 
 //Adafruit RGBLCD (MCP23017) - can have RGB or monochrome backlight
@@ -127,7 +127,7 @@
 
 // Option for RTC and DelayTime
 // REQUIRES HARDWARE RTC: DS1307 or DS3231 connected via I2C
-#define RTC // enable RTC & timer functions
+//#define RTC // enable RTC & timer functions
 
 #ifdef RTC
 // Option for Delay Timer - GoldServe
@@ -342,14 +342,19 @@
 #define WHITE 0x7 
 
 #if defined(RGBLCD) || defined(I2CLCD)
+#include "libraries/Wire/Wire.h"
 // Using LiquidTWI2 for both types of I2C LCD's
 // see http://blog.lincomatic.com/?p=956 for installation instructions
-#include <Wire.h>
 #ifdef I2CLCD_PCF8574
-#include <LiquidCrystal_I2C.h>
+#include "libraries/LiquidCrystal_I2C.h"
 #define LCD_I2C_ADDR 0x27
 #else
-#include <LiquidTWI2.h>
+#ifdef I2CLCD
+#define MCP23008 // Adafruit I2C Backpack
+#else
+#define MCP23017 // Adafruit RGB LCD
+#endif // I2CLCD
+#include "libraries/LiquidTWI2/LiquidTWI2.h"
 #define LCD_I2C_ADDR 0x20 // for adafruit shield or backpack
 #endif // I2CLCD_PCF8574
 #endif // RGBLCD || I2CLCD
@@ -526,7 +531,7 @@ class OnboardDisplay
 {
 #if defined(RGBLCD) || defined(I2CLCD)
 #ifdef I2CLCD_PCF8574
-#include <LiquidCrystal_I2C.h>
+#include "libraries/LiquidCrystal_I2C.h"
   LiquidCrystal_I2C m_Lcd;  
 #else
   LiquidTWI2 m_Lcd;
@@ -654,8 +659,14 @@ public:
 #endif // GFI
 
 #ifdef TEMPERATURE_MONITORING
-#include "Adafruit_MCP9808.h"  //  adding the ambient temp sensor to I2C
-#include "Adafruit_TMP007.h"   //  adding the TMP007 IR I2C sensor
+ #ifdef MCP9808_IS_ON_I2C
+  #include "libraries/Adafruit_MCP9808/Adafruit_MCP9808.h"  //  adding the ambient temp sensor to I2C
+ #endif 
+ #ifdef TMP007_IS_ON_I2C
+  #include "libraries/Adafruit_TMP007/Adafruit_TMP007.h"   //  adding the TMP007 IR I2C sensor
+ #endif 
+
+
 
 // TempMonitor.m_Flags
 #define TMF_OVERTEMPERATURE          0x01

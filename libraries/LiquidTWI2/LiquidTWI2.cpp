@@ -1,4 +1,3 @@
-#include "LiquidTWI2.h"
 
 /*
   LiquidTWI2 High Performance i2c LCD driver for MCP23008 & MCP23017
@@ -20,13 +19,14 @@
 #include "TinyWireM.h"
 #define Wire TinyWireM
 #else
-#include <Wire.h>
+#include "../Wire/Wire.h"
 #endif
 #if defined(ARDUINO) && (ARDUINO >= 100) //scl
 #include "Arduino.h"
 #else
 #include "WProgram.h"
 #endif
+#include "LiquidTWI2.h"
 
 
 //MCP23017 - Adafruit RGB LCD Shield
