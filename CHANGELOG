@@ -1,5 +1,8 @@
 Change Log
 
+20150327 SCL
+- take VERSION out of Makefile.. set it in open_evse.h again
+
 vD3.6.2 SCL 20150326
 - add delay(200) to beginning of setup() to fix random LCD black out at boot
 	Thanks to CraigK!

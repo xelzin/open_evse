@@ -35,7 +35,7 @@
 #include "libraries/FlexiTimer2/FlexiTimer2.h" // Required for RTC and Delay Timer
 #include "libraries/Time/Time.h"
 
-//#define VERSION "D3.6.1"
+#define VERSION "D3.6.1"
 
 //-- begin features
 

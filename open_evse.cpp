@@ -788,8 +788,8 @@ void OnboardDisplay::Init()
   LcdPrint_P(0,PSTR("Open EVSE       "));
   LcdPrint_P(0,1,PSTR("Version "));
   LcdPrint_P(VERSTR);
-  LcdPrint_P(PSTR("   "));
-  delay(1500);
+  //  LcdPrint_P(PSTR("   "));
+  delay(2500);
   WDT_RESET();
 #endif //#ifdef LCD16X2
 }
