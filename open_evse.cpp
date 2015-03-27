@@ -220,6 +220,8 @@ prog_char g_psStopped[] PROGMEM =  "Stopped";
 prog_char g_psWaiting[] PROGMEM =  "Waiting";
 prog_char g_psSleeping[] PROGMEM = "Sleeping";
 prog_char g_psEvConnected[] PROGMEM = "Connected";
+prog_char g_psReady[] PROGMEM = "Ready";
+prog_char g_psCharging[] PROGMEM = "Charging";
 #endif // LCD16X2
 
 #ifdef TEMPERATURE_MONITORING
@@ -865,8 +867,6 @@ void OnboardDisplay::LcdMsg(const char *l1,const char *l2)
 
 
 char g_sRdyLAstr[] = "L%d:%dA";
-prog_char g_psReady[] PROGMEM = "Ready";
-prog_char g_psCharging[] PROGMEM = "Charging";
 void OnboardDisplay::Update(int8_t force,uint8_t hardfault)
 {
   uint8_t curstate = g_EvseController.GetState();
@@ -3950,6 +3950,8 @@ void EvseReset()
 void setup()
 {
   wdt_disable();
+
+  delay(200);  // give I2C devices time to be ready before running code that wants to initialize I2C devices.  Otherwise a hang can occur upon powerup.
   
   Serial.begin(SERIAL_BAUD);
 
@@ -3971,20 +3973,11 @@ void setup()
   WDT_ENABLE();
 
 #ifdef KWH_RECORDING
-      if (eeprom_read_byte((uint8_t*)EOFS_KWH_ACCUMULATED+0) == 0xff) {            // Check for unitialized eeprom condition so it can begin at 0kWh
-        if (eeprom_read_byte((uint8_t*)EOFS_KWH_ACCUMULATED+1) == 0xff) {
-          if (eeprom_read_byte((uint8_t*)EOFS_KWH_ACCUMULATED+2) == 0xff) {    
-             if (eeprom_read_byte((uint8_t*)EOFS_KWH_ACCUMULATED+3) == 0xff) {
-              eeprom_write_byte((uint8_t*)EOFS_KWH_ACCUMULATED+0, 0x00);           //  Set the four bytes to zero just once in the case of unitialized eeprom
-              eeprom_write_byte((uint8_t*)EOFS_KWH_ACCUMULATED+1, 0x00);
-              eeprom_write_byte((uint8_t*)EOFS_KWH_ACCUMULATED+2, 0x00);
-              eeprom_write_byte((uint8_t*)EOFS_KWH_ACCUMULATED+3, 0x00);             
-          }}}}
+      if (eeprom_read_dword((uint32_t*)EOFS_KWH_ACCUMULATED) == 0xffffffff) { // Check for unitialized eeprom condition so it can begin at 0kWh
+        eeprom_write_dword((uint32_t*)EOFS_KWH_ACCUMULATED,0); //  Set the four bytes to zero just once in the case of unitialized eeprom
+      }
 
-      g_WattHours_accumulated = (eeprom_read_byte((uint8_t*)EOFS_KWH_ACCUMULATED + 0) +          // get the stored value for the kWh from eeprom
-                                (eeprom_read_byte((uint8_t*)EOFS_KWH_ACCUMULATED + 1) * 256ul) +
-                                (eeprom_read_byte((uint8_t*)EOFS_KWH_ACCUMULATED + 2) * 65536ul) +
-                                (eeprom_read_byte((uint8_t*)EOFS_KWH_ACCUMULATED + 3) * 16777216ul));
+      g_WattHours_accumulated = eeprom_read_dword((uint32_t*)EOFS_KWH_ACCUMULATED);        // get the stored value for the kWh from eeprom
 #endif // KWH_RECORDING
 
 }  // setup()
