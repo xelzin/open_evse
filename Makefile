@@ -38,8 +38,9 @@ F_CPU = 16000000L
 
 # Name of the program and main cpp file:
 TARGET = open_evse
-VERSION = \"D3.6.1\"
+VERSION = \"D3.6.2\"
 
+#CDEFS = -DAMMETER -DRTC 
 CDEFS = -DAMMETER -DRAPI -DRTC 
 CDEFS += -DKWH_RECORDING
 # for LiquidTWI2 - -DMCP23017 for RGB, -DMCP23008 for I2C backpack
