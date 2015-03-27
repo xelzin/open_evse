@@ -95,28 +95,15 @@ DEBUG = stabs
 OPT = s
 
 # Include directories
-CINCS = -I$(ARDUINO_CORE) $(patsubst %,-I$(ARDUINO_DIR)/libraries/%,$(ARDLIBS)) $(patsubst %,-I$(HOME)/sketchbook/libraries/%,$(USERLIBS))
+CINCS = -I. -I$(ARDUINO_CORE) $(patsubst %,-I$(ARDUINO_DIR)/libraries/%,$(ARDLIBS)) $(patsubst %,-I$(HOME)/sketchbook/libraries/%,$(USERLIBS))
 
-# Compiler flag to set the C Standard level.
-# c89   - "ANSI" C
-# gnu89 - c89 plus GCC extensions
-# c99   - ISO C99 standard (not yet fully implemented)
-# gnu99 - c99 plus GCC extensions
-#CSTANDARD = -std=gnu99
-CDEBUG = -g$(DEBUG)
-#CWARN = -Wall -Wstrict-prototypes
-#CTUNING =  -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
-CTUNING = -felide-constructors -ffunction-sections -fdata-sections -fno-exceptions -std=c++0x -w -MMD
-#CEXTRA = -Wa,-adhlns=$(<:.c=.lst)
-
-CFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CSTANDARD) $(CEXTRA) $(CTUNING)
-#CXXFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CTUNING)
-CXXFLAGS = -c -g -Os -felide-constructors -std=c++0x -w -MMD -fno-exceptions -ffunction-sections -fdata-sections -mmcu=$(MCU) -DF_CPU=$(F_CPU) $(CDEFS) $(CINCS)
+CXXFLAGS = -c -g -Os -felide-constructors -std=c++0x -w -MMD -fno-exceptions -ffunction-sections -fdata-sections -mmcu=$(MCU) -DF_CPU=$(F_CPU)  -DARDUINO=22 $(CDEFS) $(CINCS)
 #ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
 LDFLAGS = -lm
 
 # Programming support using avrdude. Settings and variables.
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
+AVRDUDE_FUSES = -U lfuse:w:0xFF:m -U hfuse:w:0xD7:m -U efuse:w:0x07:m
 AVRDUDE_FLAGS = -p $(MCU) -c $(AVRDUDE_PROGRAMMER) -C $(ARDUINO_DIR)/hardware/tools/avr/etc/avrdude.conf
 
 # Program settings
@@ -138,10 +125,6 @@ DBG = $(SRC:.c=.d) $(CXXSRC:.cpp=.d) $(CPPSRC:.cpp=.d)
 # Define all listing files.
 LST = $(ASRC:.S=.lst) $(CXXSRC:.cpp=.lst) $(SRC:.c=.lst)
 
-# Combine all necessary flags and optional flags.
-# Add target processor to flags.
-ALL_CFLAGS = -mmcu=$(MCU) -I. $(CFLAGS)
-ALL_CXXFLAGS = -mmcu=$(MCU) -I. $(CXXFLAGS)
 ALL_ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp $(ASFLAGS)
 
 # Default target.
@@ -159,8 +142,12 @@ lss: $(TARGET).lss
 sym: $(TARGET).sym
 
 # Program the device.  
-upload: $(TARGET).hex
+flash: $(TARGET).hex
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH)
+# set the fuses
+fuses: $(TARGET).hex
+	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_FUSES)
+
 
 	# Display size of file.
 HEXSIZE = $(SIZE) --target=$(FORMAT) $(TARGET).hex
@@ -213,11 +200,11 @@ libcore.a: $(OBJ)
 
 # Compile: create object files from C++ source files.
 .cpp.o:
-	$(CXX) -c $(ALL_CXXFLAGS) $< -o $@
+	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 # Compile: create object files from C source files.
 .c.o:
-	$(CC) -c $(ALL_CFLAGS) $< -o $@ 
+	$(CC) -c $(CXXFLAGS) $< -o $@ 
 
 # Compile: create assembler files from C source files.
 .c.s:
@@ -256,443 +243,3 @@ depend:
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-open_evse.o: open_evse.cpp open_evse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/wdt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/pgmspace.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/eeprom.h \
-  arduino-0022/hardware/arduino/cores/arduino/pins_arduino.h \
-  arduino-0022/hardware/arduino/cores/arduino/WProgram.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/string.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/math.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/WCharacter.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/ctype.h \
-  arduino-0022/hardware/arduino/cores/arduino/WString.h \
-  arduino-0022/hardware/arduino/cores/arduino/HardwareSerial.h \
-  arduino-0022/hardware/arduino/cores/arduino/Stream.h \
-  arduino-0022/hardware/arduino/cores/arduino/Print.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  libraries/RTClib/RTClib.h libraries/FlexiTimer2/FlexiTimer2.h \
-  libraries/Time/Time.h libraries/Wire/Wire.h \
-  libraries/LiquidTWI2/LiquidTWI2.h \
-  arduino-0022/hardware/arduino/cores/arduino/Print.h rapi_proc.h
-rapi_proc.o: rapi_proc.cpp open_evse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/wdt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/pgmspace.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/eeprom.h \
-  arduino-0022/hardware/arduino/cores/arduino/pins_arduino.h \
-  arduino-0022/hardware/arduino/cores/arduino/WProgram.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/string.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/math.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/WCharacter.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/ctype.h \
-  arduino-0022/hardware/arduino/cores/arduino/WString.h \
-  arduino-0022/hardware/arduino/cores/arduino/HardwareSerial.h \
-  arduino-0022/hardware/arduino/cores/arduino/Stream.h \
-  arduino-0022/hardware/arduino/cores/arduino/Print.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  libraries/RTClib/RTClib.h libraries/FlexiTimer2/FlexiTimer2.h \
-  libraries/Time/Time.h libraries/Wire/Wire.h \
-  libraries/LiquidTWI2/LiquidTWI2.h \
-  arduino-0022/hardware/arduino/cores/arduino/Print.h rapi_proc.h
-HardwareSerial.o:  \
- arduino-0022/hardware/arduino/cores/arduino/HardwareSerial.cpp \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/string.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring_private.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay_basic.h \
-  arduino-0022/hardware/arduino/cores/arduino/HardwareSerial.h \
-  arduino-0022/hardware/arduino/cores/arduino/Stream.h \
-  arduino-0022/hardware/arduino/cores/arduino/Print.h \
-  arduino-0022/hardware/arduino/cores/arduino/WString.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/ctype.h
-WMath.o: arduino-0022/hardware/arduino/cores/arduino/WMath.cpp \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h
-WString.o: arduino-0022/hardware/arduino/cores/arduino/WString.cpp \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  arduino-0022/hardware/arduino/cores/arduino/WProgram.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/string.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/math.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/WCharacter.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/ctype.h \
-  arduino-0022/hardware/arduino/cores/arduino/WString.h \
-  arduino-0022/hardware/arduino/cores/arduino/HardwareSerial.h \
-  arduino-0022/hardware/arduino/cores/arduino/Stream.h \
-  arduino-0022/hardware/arduino/cores/arduino/Print.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h
-Print.o: arduino-0022/hardware/arduino/cores/arduino/Print.cpp \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/string.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/math.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/Print.h \
-  arduino-0022/hardware/arduino/cores/arduino/WString.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/ctype.h
-Wire.o: libraries/Wire/Wire.cpp \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/string.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  libraries/Wire/utility/twi.c \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/math.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/compat/twi.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/twi.h \
-  libraries/Wire/utility/twi.h libraries/Wire/Wire.h
-LiquidTWI2.o: libraries/LiquidTWI2/LiquidTWI2.cpp \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/string.h \
-  libraries/LiquidTWI2/../Wire/Wire.h \
-  arduino-0022/hardware/arduino/cores/arduino/WProgram.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/math.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/WCharacter.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/ctype.h \
-  arduino-0022/hardware/arduino/cores/arduino/WString.h \
-  arduino-0022/hardware/arduino/cores/arduino/HardwareSerial.h \
-  arduino-0022/hardware/arduino/cores/arduino/Stream.h \
-  arduino-0022/hardware/arduino/cores/arduino/Print.h \
-  libraries/LiquidTWI2/LiquidTWI2.h \
-  arduino-0022/hardware/arduino/cores/arduino/Print.h
-RTClib.o: libraries/RTClib/RTClib.cpp libraries/RTClib/../Wire/Wire.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/pgmspace.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  libraries/RTClib/RTClib.h \
-  arduino-0022/hardware/arduino/cores/arduino/WProgram.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/string.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/math.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/WCharacter.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/ctype.h \
-  arduino-0022/hardware/arduino/cores/arduino/WString.h \
-  arduino-0022/hardware/arduino/cores/arduino/HardwareSerial.h \
-  arduino-0022/hardware/arduino/cores/arduino/Stream.h \
-  arduino-0022/hardware/arduino/cores/arduino/Print.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h
-FlexiTimer2.o: libraries/FlexiTimer2/FlexiTimer2.cpp \
-  libraries/FlexiTimer2/FlexiTimer2.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h
-Time.o: libraries/Time/Time.cpp \
-  arduino-0022/hardware/arduino/cores/arduino/WProgram.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/string.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/math.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/WCharacter.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/ctype.h \
-  arduino-0022/hardware/arduino/cores/arduino/WString.h \
-  arduino-0022/hardware/arduino/cores/arduino/HardwareSerial.h \
-  arduino-0022/hardware/arduino/cores/arduino/Stream.h \
-  arduino-0022/hardware/arduino/cores/arduino/Print.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  libraries/Time/Time.h
-pins_arduino.o:  \
- arduino-0022/hardware/arduino/cores/arduino/pins_arduino.c \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring_private.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay_basic.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/pins_arduino.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/pgmspace.h
-wiring.o: arduino-0022/hardware/arduino/cores/arduino/wiring.c \
-  arduino-0022/hardware/arduino/cores/arduino/wiring_private.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay_basic.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h
-wiring_analog.o:  \
- arduino-0022/hardware/arduino/cores/arduino/wiring_analog.c \
-  arduino-0022/hardware/arduino/cores/arduino/wiring_private.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay_basic.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/pins_arduino.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/pgmspace.h
-wiring_digital.o:  \
- arduino-0022/hardware/arduino/cores/arduino/wiring_digital.c \
-  arduino-0022/hardware/arduino/cores/arduino/wiring_private.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay_basic.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/pins_arduino.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/pgmspace.h
-wiring_pulse.o:  \
- arduino-0022/hardware/arduino/cores/arduino/wiring_pulse.c \
-  arduino-0022/hardware/arduino/cores/arduino/wiring_private.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay_basic.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/pins_arduino.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/pgmspace.h
-wiring_shift.o:  \
- arduino-0022/hardware/arduino/cores/arduino/wiring_shift.c \
-  arduino-0022/hardware/arduino/cores/arduino/wiring_private.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay_basic.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h
-WInterrupts.o: arduino-0022/hardware/arduino/cores/arduino/WInterrupts.c \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/inttypes.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdint.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/io.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/sfr_defs.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/iom328p.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/portpins.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/common.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/version.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/fuse.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/lock.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/interrupt.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/pgmspace.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stddef.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdio.h \
-  c:\git\open_evse\arduino-0022\hardware\tools\avr\bin\../lib/gcc/avr/4.3.2/include/stdarg.h \
-  arduino-0022/hardware/arduino/cores/arduino/WConstants.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/stdlib.h \
-  arduino-0022/hardware/arduino/cores/arduino/binary.h \
-  arduino-0022/hardware/arduino/cores/arduino/wiring_private.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/avr/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay.h \
-  c:/git/open_evse/arduino-0022/hardware/tools/avr/lib/gcc/../../avr/include/util/delay_basic.h

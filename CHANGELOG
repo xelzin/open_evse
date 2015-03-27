@@ -2,6 +2,7 @@ Change Log
 
 20150327 SCL
 - take VERSION out of Makefile.. set it in open_evse.h again
+- fix bug in Makefile gcc was being passed wrong flags
 
 vD3.6.2 SCL 20150326
 - add delay(200) to beginning of setup() to fix random LCD black out at boot

@@ -14,7 +14,9 @@ Before trying to build for the first time, and every time that you download a ne
 To build open_evse.hex:
   make
 To load the firmware via a USBasp programmer:
-  make upload
+  make fuses
+To load the firmware via a USBasp programmer:
+  make flash
 To clean up intermediate files from the build process:
   make clean
 
