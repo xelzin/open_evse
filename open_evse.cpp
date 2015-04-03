@@ -785,11 +785,11 @@ void OnboardDisplay::Init()
   m_Lcd.clear(); // need this to activate the custom chars
 #endif //#ifdef DELAYTIMER
 
-  LcdPrint_P(0,PSTR("Open EVSE       "));
+  LcdClear();
+  LcdPrint_P(0,PSTR("Open EVSE"));
   LcdPrint_P(0,1,PSTR("Version "));
   LcdPrint_P(VERSTR);
-  //  LcdPrint_P(PSTR("   "));
-  delay(2500);
+  delay(1500);
   WDT_RESET();
 #endif //#ifdef LCD16X2
 }
