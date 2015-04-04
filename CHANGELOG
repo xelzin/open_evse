@@ -1,5 +1,9 @@
 Change Log
 
+vD3.6.3 SCL 20150403
+- fix compile errors in Arduino 1.5.8+ due to deprecation of prog_char
+	
+
 20150327 SCL
 - take VERSION out of Makefile.. set it in open_evse.h again
 - fix bug in Makefile gcc was being passed wrong flags
