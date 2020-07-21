@@ -61,7 +61,7 @@
 
 // Enable three-phase energy calculation
 // Note: three-phase energy will always be calculated even if EV is only using singe-phase. Ony enable if always charging 3-phase EV and aware of this limitation.
-//#define THREEPHASE
+#define THREEPHASE
 
 // charging access control - if defined, enables RAPI G4/S4 commands
 //  to enable/disable charging function
@@ -86,21 +86,6 @@
 // add checksum to RAPI responses RAPI v2.0.0+
 #define RAPI_RESPONSE_CHK
 #endif // RAPI_FF
-
-// RAPI over I2C
-//#define RAPI_I2C
-
-// enable sending of RAPI commands
-//#define RAPI_SENDER
-
-// serial port command line
-// For the RTC version, only CLI or LCD can be defined at one time.
-// There is a directive to take care of that if you forget.
-//#define SERIALCLI
-
-// EVSE must call state transition function for permission to change states
-//#define STATE_TRANSITION_REQ_FUNC
-
 
 // enable watchdog timer
 #define WATCHDOG
@@ -199,16 +184,16 @@ extern AutoCurrentCapacityController g_ACCController;
 #define RGBLCD
 
 //select default LCD backlight mode. can be overridden w/CLI/RAPI
-#define BKL_TYPE_MONO 0
-#define BKL_TYPE_RGB  1
-#define DEFAULT_LCD_BKL_TYPE BKL_TYPE_RGB
+//#define BKL_TYPE_MONO 0
+//#define BKL_TYPE_RGB  1
+//#define DEFAULT_LCD_BKL_TYPE BKL_TYPE_RGB
 //#define DEFAULT_LCD_BKL_TYPE BKL_TYPE_MONO
 
 // Adafruit LCD backpack in I2C mode (MCP23008)
-//#define I2CLCD
+#define I2CLCD
 // Support PCF8574* based I2C backpack using F. Malpartida's library
 // https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads
-//#define I2CLCD_PCF8574
+#define I2CLCD_PCF8574
 
 // Advanced Powersupply... Ground check, stuck relay, L1/L2 detection.
 #define ADVPWR
@@ -313,7 +298,7 @@ extern AutoCurrentCapacityController g_ACCController;
 #endif
 
 #if defined(RGBLCD) || defined(I2CLCD)
-#define LCD16X2
+#define LCD20X4
 //If LCD is not defined, undef BTN_MENU - requires LCD
 #else
 #undef BTN_MENU
@@ -397,7 +382,7 @@ extern AutoCurrentCapacityController g_ACCController;
 // AN INFINITE RESET LOOP
 #define WATCHDOG_TIMEOUT WDTO_2S
 
-#define LCD_MAX_CHARS_PER_LINE 16
+#define LCD_MAX_CHARS_PER_LINE 20
 
 
 #ifdef SERIALCLI
@@ -420,7 +405,7 @@ extern AutoCurrentCapacityController g_ACCController;
 
 // maximum allowable current in amps
 #define MAX_CURRENT_CAPACITY_L1 16 // J1772 Max for L1 on a 20A circuit = 16, 15A circuit = 12
-#define MAX_CURRENT_CAPACITY_L2 80 // J1772 Max for L2 = 80
+#define MAX_CURRENT_CAPACITY_L2 32 // J1772 Max for L2 = 80
 
 //J1772EVSEController
 
@@ -673,7 +658,7 @@ extern AutoCurrentCapacityController g_ACCController;
 
 #ifdef KWH_RECORDING
 #define VOLTS_FOR_L1 120       // conventional for North America
-#define VOLTS_FOR_L2 240       // conventional for North America and Commonwealth countries
+#define VOLTS_FOR_L2 230       // conventional for North America and Commonwealth countries
 //  #define VOLTS_FOR_L2 230   // conventional for most of the world
 #endif // KWH_RECORDING
 
